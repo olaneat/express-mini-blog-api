@@ -88,22 +88,17 @@ exports.delete_arictle = (auth, async (req, res, next) => {
 })
 
 
-exports.update_article = (auth, async (req, res, next) => {
+exports.update_article = (auth, (req, res, next) => {
     try {
-        article = await Articles.findOneAndUpdate(req.params.id)
-            .populate('user')
-        const { body, user, title } = req.body
-        let updateAricle = Articles.create({
-            body,
-            title,
-            user,
+        const article = new Articles({
+            _id: req.params.id,
+            title: req.body.title,
+            user: req.body.user,
+            body: req.body.body
         })
-        const result = {
-            success: true,
-            msg: 'Article sucessfully updated',
-            data: updateAricle
-        }
-        res.send(result)
+
+        Articles.updateOne({ _id: req.params.id }, article)
+        res.status(200).json({ success: true, msg: 'update successful', article })
     }
     catch (err) {
         res.status(400).json({ msg: err.message, success: false })
