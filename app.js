@@ -1,56 +1,12 @@
 require('./config/database').connect()
-const bcrypt = require('bcryptjs/dist/bcrypt')
-const express = require('express')
-const jwt = require("jsonwebtoken");
+const express = require('express');
 const app = express()
-const User = require('./models/acct')
+const articleRouter = require('./blog-post/route')
+const acctRouter = require('./acct/route')
+app.use(express.json({ limit: "50mb" }));
 
-app.use(express.json())
 
-app.post('/register', async (req, res) => {
-    try {
-        const { firstName, username, surname, email, password } = req.body;
-        if (!(email && firstName && username && surname && password)) {
-            res.status(400).send('All fields are required')
-        }
-
-        const oldUser = await User.findOne({ email })
-
-        if (oldUser) {
-            res.status(409).send('user already exist, kindly Login')
-        }
-
-        encryptedPassword = await bcrypt.hash(password, 10)
-
-        const user = await User.create({
-            firstName,
-            username,
-            surname,
-            email: email.toLowerCase(),
-            password: encryptedPassword
-
-        })
-        const token = jwt.sign(
-            { user_id: user._id, email },
-            process.env.TOKEN_KEY,
-            {
-                expiresIn: "2h"
-            }
-        );
-        user.token = token
-        const respond = {
-            status: 201,
-            'message': 'User successfully created',
-            user: user
-        }
-        res.json(respond)
-    }
-    catch (err) {
-        console.log(err)
-    }
-})
-
-app.post('/login', (req, res) => {
-
-})
+app.use('/article', articleRouter)
+app.get('')
+app.use('/acct/', acctRouter)
 module.exports = app
