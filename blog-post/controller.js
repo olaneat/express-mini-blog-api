@@ -88,7 +88,7 @@ exports.delete_arictle = (auth, async (req, res, next) => {
 })
 
 
-exports.update_article = (auth, (req, res, next) => {
+exports.update_article = ((req, res, next) => {
     try {
         const article = new Articles({
             _id: req.params.id,
