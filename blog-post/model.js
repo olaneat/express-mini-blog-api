@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
-const User = require('../acct/model')
 const Schema = mongoose.Schema
+const multer = require("multer");
+const cloudinary = require("cloudinary");
+const cloudinaryStorage = require("multer-storage-cloudinary");
 
 
 const BlogPost = new mongoose.Schema({
