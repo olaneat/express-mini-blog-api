@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 
-acctRouter.post('register', async (req, res) => {
+acctRouter.post('/register', async (req, res) => {
     try {
         const { firstName, username, surname, email, password } = req.body;
         if (!(email && firstName && username && surname && password)) {

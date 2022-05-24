@@ -1,8 +1,5 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-const multer = require("multer");
-const cloudinary = require("cloudinary");
-const cloudinaryStorage = require("multer-storage-cloudinary");
 
 
 const BlogPost = new mongoose.Schema({
@@ -12,6 +9,7 @@ const BlogPost = new mongoose.Schema({
     comments: { type: Schema.Types.Array },
     updatedOn: { type: Date, default: Date.now() },
     createdOn: { type: Date, default: Date.now() },
+    img: { data: Buffer, contentType: String },
 })
 
 

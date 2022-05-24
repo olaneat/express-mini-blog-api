@@ -8,7 +8,6 @@ const userSchema = new mongoose.Schema({
     email: { type: String, unique: true },
     firstName: { type: String, default: null },
     surname: { type: String, default: null },
-    comment: { type: Schema.Types.ObjectId, ref: 'Articles' },
     password: { type: String },
     token: { type: String }
 })

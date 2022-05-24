@@ -1,21 +1,42 @@
 const express = require("express");
-const auth = require('../middleware/auth')
 const app = express
 const router = app.Router()
 const Articles = require('./model')
+const fs = require('fs')
 const User = require('../acct/model')
+//const multer = require("multer");
+const cloudinary = require("cloudinary");
+const cloudinaryStorage = require("multer-storage-cloudinary");
+const path = require('path');
 
-exports.post_article = (auth, async (req, res, next) => {
+/**
+ * const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, '/blog-imgs')
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + '-' + Date.now())
+    }
+});
+const upload = multer({ storage: storage })
+
+ */
+exports.post_article = async (req, res, next) => {
+    console.log(req.file, req.user)
     try {
-        const { body, user, title } = req.body
-        const article = await Articles.create({
-            body,
-            title,
-            user
-        })
+        const obj = {
+            body: req.body.body,
+            user: req.user.user_id,
+            title: req.body.title,
+            img: {
+                data: req.file.buffer,
+                contentType: req.file.mimetype
+            }
+        }
 
+        const article = await Articles.create(obj)
         const response = {
-            'msg': 'Post successfully added',
+            'msg': 'Article successfully added',
             status: 201,
             data: article
         }
@@ -27,7 +48,7 @@ exports.post_article = (auth, async (req, res, next) => {
     }
 
     return next()
-})
+}
 
 exports.display_articles = (async (req, res, next) => {
     try {
@@ -50,7 +71,7 @@ exports.display_articles = (async (req, res, next) => {
 
 
 exports.display_articles_by_id = (async (req, res, next) => {
-
+    console.log(req.params)
     try {
         article = await Articles.findById(req.params.id)
             .populate('user')
@@ -69,7 +90,7 @@ exports.display_articles_by_id = (async (req, res, next) => {
 })
 
 
-exports.delete_arictle = (auth, async (req, res, next) => {
+exports.delete_arictle = (async (req, res, next) => {
     try {
         article = await Articles.deleteOne({}, { id: req.params.id })
         article_list = await Articles.find({})
@@ -88,13 +109,14 @@ exports.delete_arictle = (auth, async (req, res, next) => {
 })
 
 
-exports.update_article = (auth, (req, res, next) => {
+exports.update_article = ((req, res, next) => {
     try {
         const article = new Articles({
             _id: req.params.id,
             title: req.body.title,
             user: req.body.user,
-            body: req.body.body
+            body: req.body.body,
+            image: req.body.image
         })
 
         Articles.updateOne({ _id: req.params.id }, article)
