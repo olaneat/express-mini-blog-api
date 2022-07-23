@@ -68,6 +68,7 @@ acctRouter.post('/login', async (req, res) => {
         }
         const response = {
             'message': 'Login Successful',
+            token: user.token,
             status: 200,
             data: user
         }

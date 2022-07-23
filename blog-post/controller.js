@@ -4,33 +4,21 @@ const router = app.Router()
 const Articles = require('./model')
 const fs = require('fs')
 const User = require('../acct/model')
-//const multer = require("multer");
-const cloudinary = require("cloudinary");
-const cloudinaryStorage = require("multer-storage-cloudinary");
+const multer = require("multer");
+
 const path = require('path');
 
-/**
- * const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, '/blog-imgs')
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.fieldname + '-' + Date.now())
-    }
-});
-const upload = multer({ storage: storage })
-
- */
 exports.post_article = async (req, res, next) => {
-    console.log(req.file, req.user)
+    console.log(req.body, req.user)
     try {
         const obj = {
             body: req.body.body,
+            category: req.body.category,
             user: req.user.user_id,
             title: req.body.title,
             img: {
-                data: req.file.buffer,
-                contentType: req.file.mimetype
+                data: req.body.buffer,
+                contentType: req.body.mimetype
             }
         }
 
@@ -50,10 +38,11 @@ exports.post_article = async (req, res, next) => {
     return next()
 }
 
+
 exports.display_articles = (async (req, res, next) => {
     try {
-        article_list = await Articles.find({}, 'title')
-            .sort({ title: 1 })
+        article_list = await Articles.find({}, 'title').select({ 'img': 1 })
+            .sort({ 'createdOn': -1 })
             .populate('user')
         const respond = {
             data: article_list,
@@ -70,6 +59,25 @@ exports.display_articles = (async (req, res, next) => {
 })
 
 
+exports.display_articles_by_user = (async (req, res, next) => {
+    console.log(req.user)
+    console.log(req.query)
+    console.log(req.params)
+    console.log(req.body)
+
+    try {
+        article_list = await Articles.find({ "user": req.user_id }).select({ 'img': 1 })
+            .sort({ 'createdOn': -1 })
+        const res = {
+            data: article_list,
+            success: true
+        }
+        //res.send(res)
+    }
+    catch (err) {
+        res.status(404).json({ success: false, msg: err.message })
+    }
+})
 exports.display_articles_by_id = (async (req, res, next) => {
     console.log(req.params)
     try {
@@ -116,7 +124,8 @@ exports.update_article = ((req, res, next) => {
             title: req.body.title,
             user: req.body.user,
             body: req.body.body,
-            image: req.body.image
+            image: req.body.image,
+            category: req.body.category
         })
 
         Articles.updateOne({ _id: req.params.id }, article)
