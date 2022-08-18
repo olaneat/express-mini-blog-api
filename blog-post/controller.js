@@ -1,15 +1,14 @@
 const express = require("express");
 const app = express
-const router = app.Router()
 const Articles = require('./model')
-const fs = require('fs')
+//const Comment = require('./model')
 const User = require('../acct/model')
-const multer = require("multer");
-
-const path = require('path');
+//const fs = require('fs')
+//const multer = require("multer");
+//const path = require('path');
+//const router = app.Router()
 
 exports.post_article = async (req, res, next) => {
-    console.log(req.body, req.user)
     try {
         const obj = {
             body: req.body.body,
@@ -17,12 +16,12 @@ exports.post_article = async (req, res, next) => {
             user: req.user.user_id,
             title: req.body.title,
             img: {
-                data: req.body.buffer,
-                contentType: req.body.mimetype
+                data: req.file.buffer,
+                contentType: req.file.mimetype
             }
         }
 
-        const article = await Articles.create(obj)
+        const article = await Articles.BlogPostModel.create(obj)
         const response = {
             'msg': 'Article successfully added',
             status: 201,
@@ -41,7 +40,7 @@ exports.post_article = async (req, res, next) => {
 
 exports.display_articles = (async (req, res, next) => {
     try {
-        article_list = await Articles.find({}, 'title').select({ 'img': 1 })
+        article_list = await Articles.BlogPostModel.find({}, { 'title': !null, 'category': !null, 'img': 1 }).select({})
             .sort({ 'createdOn': -1 })
             .populate('user')
         const respond = {
@@ -66,7 +65,7 @@ exports.display_articles_by_user = (async (req, res, next) => {
     console.log(req.body)
 
     try {
-        article_list = await Articles.find({ "user": req.user_id }).select({ 'img': 1 })
+        article_list = await Articles.BlogPostModel.find({ "user": req.user_id }).select({ 'img': 1 })
             .sort({ 'createdOn': -1 })
         const res = {
             data: article_list,
@@ -79,14 +78,13 @@ exports.display_articles_by_user = (async (req, res, next) => {
     }
 })
 exports.display_articles_by_id = (async (req, res, next) => {
-    console.log(req.params)
     try {
-        article = await Articles.findById(req.params.id)
-            .populate('user')
+        const article = await Articles.BlogPostModel.findById(req.params.id)
+            .populate('user').populate('comments')
         const response = {
             data: article,
             success: true,
-            msg: 'article successfully fetched'
+            msg: 'data fetched successfully '
         }
         res.send(response)
     }
@@ -116,7 +114,6 @@ exports.delete_arictle = (async (req, res, next) => {
     return next()
 })
 
-
 exports.update_article = ((req, res, next) => {
     try {
         const article = new Articles({
@@ -136,4 +133,31 @@ exports.update_article = ((req, res, next) => {
     }
     return next()
 })
+
+
+exports.create_comments = async (req, res, next) => {
+    try {
+        let obj = await Articles.CommentModel.create({
+            comment: req.body.comment,
+            email: req.body.email,
+            fullName: req.body.fullName,
+            articleId: req.body.articleId
+        })
+        const updatedpost = await Articles.BlogPostModel.findByIdAndUpdate(req.body.articleId, { $push: { comments: obj._id } }, { new: true })
+        console.log(updatedpost)
+        let response = {
+            msg: 'comment successfully added',
+            status: 201,
+            data: obj,
+            success: true
+        }
+        console.log(response)
+        res.send(response)
+    }
+    catch (err) {
+        console.log(err)
+        res.status(400).json({ msg: 'comment not save', success: false })
+    }
+    return next()
+}
 

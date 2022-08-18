@@ -5,20 +5,25 @@ const Schema = mongoose.Schema
 const BlogPost = new mongoose.Schema({
     title: { type: String, required: true },
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    body: { type: String, required: true },
-    category: { type: String, required: true },
+    body: { type: String },
+    category: { type: String },
     updatedOn: { type: Date, default: Date.now() },
     createdOn: { type: Date, default: Date.now() },
     img: { data: Buffer, contentType: String },
+    comments: [{ type: Schema.Types.ObjectId, ref: 'Comments' }]
 })
 
 
 const Comments = new mongoose.Schema({
-    comment: { type: String, default: null },
-    user: { type: Schema.Types.ObjectId, ref: 'User' },
-    post: { type: Schema.Types.ObjectId, ref: 'BlogPost' }
+    comment: { type: String },
+    fullName: { type: String },
+    email: { type: String },
+    updatedOn: { type: Date, default: Date.now() },
+    createdOn: { type: Date, default: Date.now() },
+    //articleId: { type: Schema.Types.ObjectId, ref: 'BlogPost' }
 })
 
+const CommentModel = mongoose.model('Comments', Comments,)
+const BlogPostModel = mongoose.model('BlogPost', BlogPost)
 
-module.exports = mongoose.model('Comments', Comments,)
-module.exports = mongoose.model('BlogPost', BlogPost) 
+module.exports = { CommentModel, BlogPostModel }
