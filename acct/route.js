@@ -56,10 +56,8 @@ acctRouter.post('/login', async (req, res) => {
         }
 
         const user = await User.findOne({ email });
-        const pswd = bcrypt.compareSync(password, user.password)
-        if(pswd){
-            
-        }
+        if(user){
+            const pswd = bcrypt.compareSync(password, user.password)
         //if (user && (await bcrypt.compareSync(password, user.password))) {
         if (user && pswd) {
             const token = jwt.sign(
@@ -84,7 +82,14 @@ acctRouter.post('/login', async (req, res) => {
                 'status': 400
             }
             res.send(respond)
+        }    
+        }else{
+            const respone = {
+                'message': 'user not found'
+            }
+            res.send(respone)
         }
+        
 
 
     }
