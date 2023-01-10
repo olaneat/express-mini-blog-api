@@ -56,7 +56,12 @@ acctRouter.post('/login', async (req, res) => {
         }
 
         const user = await User.findOne({ email });
-        if (user && (await bcrypt.compare(password, user.password))) {
+        const pswd = bcrypt.compareSync(password, user.password)
+        if(pswd){
+            
+        }
+        //if (user && (await bcrypt.compareSync(password, user.password))) {
+        if (user && pswd) {
             const token = jwt.sign(
                 { user_id: user._id, email },
                 process.env.TOKEN_KEY,
@@ -65,15 +70,23 @@ acctRouter.post('/login', async (req, res) => {
                 }
             )
             user.token = token
-        }
-        const response = {
-            'message': 'Login Successful',
-            token: user.token,
-            status: 200,
-            data: user
+            const response = {
+                'message': 'Login Successful',
+                token: user.token,
+                status: 200,
+                data: user
+            }
+            res.send(response)
+            
+        }else{
+            const respond = {
+                'message': 'invalid login detail, Login failed',
+                'status': 400
+            }
+            res.send(respond)
         }
 
-        res.send(response)
+
     }
     catch (err) {
         console.log(err)
