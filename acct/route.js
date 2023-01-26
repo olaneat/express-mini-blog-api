@@ -28,14 +28,14 @@ acctRouter.post('/register', async (req, res) => {
             password: encryptedPassword
 
         })
-        const token = jwt.sign(
-            { user_id: user._id, email },
-            process.env.TOKEN_KEY,
-            {
-                expiresIn: "2h"
-            }
-        );
-        user.token = token
+        // const token = jwt.sign(
+        //     { user_id: user._id, email },
+        //     process.env.TOKEN_KEY,
+        //     {
+        //         expiresIn: "2h"
+        //     }
+        // );
+        // user.token = token
         const respond = {
             status: 201,
             'message': 'User successfully created',
@@ -51,11 +51,16 @@ acctRouter.post('/register', async (req, res) => {
 acctRouter.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+        let loginResponse;
         if (!(email && password)) {
-            res.status(400).send('Sorry all fields are required')
+            loginResponse ={
+                'message': 'Sorry all fields are required'
+            }
+            res.status(400).send(loginResponse)
         }
-
+        
         const user = await User.findOne({ email });
+        
         if(user){
             const pswd = bcrypt.compareSync(password, user.password)
         //if (user && (await bcrypt.compareSync(password, user.password))) {
@@ -68,29 +73,27 @@ acctRouter.post('/login', async (req, res) => {
                 }
             )
             user.token = token
-            const response = {
+             loginResponse = {
                 'message': 'Login Successful',
                 token: user.token,
                 status: 200,
                 data: user
             }
-            res.send(response)
             
-        }else{
-            const respond = {
+        }else if(user && !pswd ){
+            loginResponse = {
                 'message': 'invalid login detail, Login failed',
                 'status': 400
             }
-            res.send(respond)
-        }    
+                    }    
         }else{
-            const respone = {
+            loginResponse = {
                 'message': 'user not found'
             }
-            res.send(respone)
+            
         }
         
-
+        res.send(loginResponse)
 
     }
     catch (err) {

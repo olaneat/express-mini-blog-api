@@ -15,5 +15,5 @@ articleRouter.get('/:id/detail', article_controller.display_articles_by_id)
 articleRouter.delete('/delete/:id', auth, article_controller.delete_arictle)
 articleRouter.post('/add-comment', article_controller.create_comments)
 articleRouter.put('/update/:id', auth, article_controller.update_article)
-articleRouter.get('/display_articles_by_user', auth, article_controller.display_articles_by_user)
+articleRouter.get('/:id/display_articles_by_user', auth, article_controller.display_articles_by_user)
 module.exports = articleRouter

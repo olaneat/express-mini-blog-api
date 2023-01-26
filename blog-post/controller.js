@@ -45,6 +45,7 @@ exports.display_articles = (async (req, res, next) => {
             .populate('user')
         const respond = {
             data: article_list,
+            'msg': 'data fetched successfully',
             success: true
         }
         res.send(respond)
@@ -59,19 +60,27 @@ exports.display_articles = (async (req, res, next) => {
 
 
 exports.display_articles_by_user = (async (req, res, next) => {
-    console.log(req.user)
-    console.log(req.query)
-    console.log(req.params)
-    console.log(req.body)
+    //console.log(req.user)
+    //console.log(req.query)
+    //console.log(req.params)
 
     try {
-        article_list = await Articles.BlogPostModel.find({ "user": req.user_id }).select({ 'img': 1 })
+        article_list = await Articles.BlogPostModel.find({}, { 'title': !null, 'category': !null, user: !null }).select({}) 
             .sort({ 'createdOn': -1 })
-        const res = {
-            data: article_list,
+            .populate('user')
+            let articles = []
+            
+            article_list.forEach((x)=>{
+                let id = x.user._id.toString()
+                if(id==req.params.id){
+                    articles.push(x)
+                }
+            })
+        const resp = {
+            data: articles,
             success: true
         }
-        //res.send(res)
+        res.send(resp)
     }
     catch (err) {
         res.status(404).json({ success: false, msg: err.message })
