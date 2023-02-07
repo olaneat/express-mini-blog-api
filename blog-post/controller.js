@@ -14,6 +14,7 @@ exports.post_article = async (req, res, next) => {
             body: req.body.body,
             category: req.body.category,
             user: req.user.user_id,
+            slug:req.body.slug,
             title: req.body.title,
             img: {
                 data: req.file.buffer,
@@ -40,7 +41,7 @@ exports.post_article = async (req, res, next) => {
 
 exports.display_articles = (async (req, res, next) => {
     try {
-        article_list = await Articles.BlogPostModel.find({}, { 'title': !null, 'category': !null, 'img': 1 }).select({})
+        article_list = await Articles.BlogPostModel.find({}, { 'title': !null, 'slug':!null, 'category': !null, 'img': 1 }).select({})
             .sort({ 'createdOn': -1 })
             .populate('user')
         const respond = {
@@ -66,19 +67,19 @@ exports.display_articles_by_user = (async (req, res, next) => {
 
     try {
         article_list = await Articles.BlogPostModel.find({}, { 'title': !null, 'category': !null, user: !null }).select({}) 
-            .sort({ 'createdOn': -1 })
-            .populate('user')
+            .sort({ 'createdOn': -1 }) 
             let articles = []
             
             article_list.forEach((x)=>{
-                let id = x.user._id.toString()
+                let id = x.user.toString()
                 if(id==req.params.id){
                     articles.push(x)
                 }
             })
         const resp = {
             data: articles,
-            success: true
+            success: true,
+            msg: 'data fetched succesfully'
         }
         res.send(resp)
     }
@@ -107,8 +108,8 @@ exports.display_articles_by_id = (async (req, res, next) => {
 
 exports.delete_arictle = (async (req, res, next) => {
     try {
-        article = await Articles.deleteOne({}, { id: req.params.id })
-        article_list = await Articles.find({})
+        article = await Articles.BlogPostModel.deleteOne({_id: req.params.id})
+        article_list = await Articles.BlogPostModel.find({})
         const result = {
             success: true,
             msg: 'article deleted successfully',
@@ -128,6 +129,7 @@ exports.update_article = ((req, res, next) => {
         const article = new Articles({
             _id: req.params.id,
             title: req.body.title,
+            slug: req.body.title,
             user: req.body.user,
             body: req.body.body,
             image: req.body.image,

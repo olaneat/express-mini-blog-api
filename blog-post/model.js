@@ -10,6 +10,7 @@ const BlogPost = new mongoose.Schema({
     updatedOn: { type: Date, default: Date.now() },
     createdOn: { type: Date, default: Date.now() },
     img: { data: Buffer, contentType: String },
+    slug: {type: String, required:true },
     comments: [{ type: Schema.Types.ObjectId, ref: 'Comments' }]
 })
 
