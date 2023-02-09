@@ -61,9 +61,6 @@ exports.display_articles = (async (req, res, next) => {
 
 
 exports.display_articles_by_user = (async (req, res, next) => {
-    //console.log(req.user)
-    //console.log(req.query)
-    //console.log(req.params)
 
     try {
         article_list = await Articles.BlogPostModel.find({}, { 'title': !null, 'category': !null, user: !null }).select({}) 
@@ -145,6 +142,31 @@ exports.update_article = ((req, res, next) => {
     return next()
 })
 
+exports.display_articles_by_categories = async (req, res, next) =>{
+    try{
+         article_list = await Articles.BlogPostModel.find({}, {'title': !null, 'category':!null, 'slug':!null, 'img': !null}).select().sort({ 'createdOn': -1 })
+         let cat = req.params.category
+         let obj = []
+
+         article_list.forEach((x)=>{
+            if(x.category == cat){
+                obj.push(x)
+            }
+         })
+         let result = {
+            msg: 'Data fetched successfully',
+            success: true,
+            data: obj
+         }
+
+         return res.send(result)
+    }
+    catch(err){
+        console.log(err)
+        res.status(404).json({'msg': 'err display data', success: false})
+    }
+    return next()
+}
 
 exports.create_comments = async (req, res, next) => {
     try {
@@ -162,7 +184,6 @@ exports.create_comments = async (req, res, next) => {
             data: obj,
             success: true
         }
-        console.log(response)
         res.send(response)
     }
     catch (err) {
